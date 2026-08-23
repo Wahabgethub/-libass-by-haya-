@@ -1,0 +1,25 @@
+import { z } from "zod";
+import { addCartLines, createCart, getCart, getCollectionByHandle, getProductByHandle, listCollections, listProducts, removeCartLines, updateCartLines } from "../_core/shopify";
+import { getSaleOverridesByHandles, listHiddenProductHandles, listProductMedia } from "../db";
+import { applySaleOverride, resolveEffectivePrice } from "../salePricing";
+import { publicProcedure, router } from "../_core/trpc";
+const line = z.object({ variantId: z.string().min(1), quantity: z.number().int().min(1).max(99) }); const updateLine = z.object({ lineId: z.string().min(1), quantity: z.number().int().min(0).max(99) });
+async function attachLocalMedia(product: Awaited<ReturnType<typeof getProductByHandle>>) { const custom = await listProductMedia(product.handle); if (!custom.length) return product; const views = custom.map(item => ({ url: item.imageUrl, altText: item.altText ?? `${product.title} ${item.viewLabel} view`, viewLabel: item.viewLabel })); return { ...product, images: [...views, ...product.images] }; }
+async function decorate(products: Awaited<ReturnType<typeof listProducts>>) { const [overrides, hidden] = await Promise.all([getSaleOverridesByHandles(products.map(product => product.handle)), listHiddenProductHandles()]); return Promise.all(products.filter(product => !hidden.has(product.handle)).map(async product => applySaleOverride(await attachLocalMedia(product), overrides.get(product.handle)))); }
+async function decorateCart(cart: Awaited<ReturnType<typeof getCart>>) { if (!cart) return cart; const overrides = await getSaleOverridesByHandles(cart.items.map(item => item.productHandle)); const items = cart.items.map(item => { const price = resolveEffectivePrice(item.unitPrice.amount, overrides.get(item.productHandle)); const activeSale = Boolean(price.salePrice); return { ...item, regularPrice: activeSale ? { ...item.unitPrice, amount: price.regularPrice } : undefined, salePrice: activeSale ? { ...item.unitPrice, amount: price.effectivePrice } : null, unitPrice: { ...item.unitPrice, amount: price.effectivePrice }, lineTotal: { ...item.lineTotal, amount: (Number(price.effectivePrice) * item.quantity).toFixed(2) } }; }); const total = items.reduce((sum, item) => sum + Number(item.lineTotal.amount), 0).toFixed(2); return { ...cart, items, subtotal: { ...cart.subtotal, amount: total }, total: { ...cart.total, amount: total } }; }
+async function decorateRequiredCart(cart: Awaited<ReturnType<typeof getCart>>) { const decorated = await decorateCart(cart); if (!decorated) throw new Error("Cart unavailable"); return decorated; }
+export const commerceRouter = router({
+  products: router({
+    list: publicProcedure.input(z.object({ first: z.number().int().min(1).max(1000).optional(), collectionHandle: z.string().min(1).optional() }).optional()).query(async ({ input }) => decorate(await listProducts(input ?? {}))),
+    byHandle: publicProcedure.input(z.object({ handle: z.string().min(1) })).query(async ({ input }) => { const product = await getProductByHandle(input.handle); if (!product) return product; const [overrides, hidden] = await Promise.all([getSaleOverridesByHandles([product.handle]), listHiddenProductHandles()]); if (hidden.has(product.handle)) return null; return applySaleOverride(await attachLocalMedia(product), overrides.get(product.handle)); }),
+  }),
+  collections: router({ list: publicProcedure.input(z.object({ first: z.number().int().min(1).max(50).optional() }).optional()).query(({ input }) => listCollections(input?.first)), byHandle: publicProcedure.input(z.object({ handle: z.string().min(1) })).query(({ input }) => getCollectionByHandle(input.handle)) }),
+  cart: router({
+    create: publicProcedure.input(z.object({ lines: z.array(line).min(1).max(50) })).mutation(async ({ input }) => decorateRequiredCart(await createCart(input.lines))),
+    get: publicProcedure.input(z.object({ cartId: z.string().min(1) })).query(async ({ input }) => decorateCart(await getCart(input.cartId))),
+    addLines: publicProcedure.input(z.object({ cartId: z.string().min(1), lines: z.array(line).min(1).max(50) })).mutation(async ({ input }) => decorateRequiredCart(await addCartLines(input.cartId, input.lines))),
+    updateLines: publicProcedure.input(z.object({ cartId: z.string().min(1), lines: z.array(updateLine).min(1).max(50) })).mutation(async ({ input }) => { const toRemove = input.lines.filter(item => item.quantity === 0).map(item => item.lineId); const toUpdate = input.lines.filter(item => item.quantity > 0); let cart = null; if (toUpdate.length) cart = await updateCartLines(input.cartId, toUpdate); if (toRemove.length) cart = await removeCartLines(input.cartId, toRemove); return decorateRequiredCart(cart ?? await getCart(input.cartId)); }),
+    removeLines: publicProcedure.input(z.object({ cartId: z.string().min(1), lineIds: z.array(z.string().min(1)).min(1).max(50) })).mutation(async ({ input }) => decorateRequiredCart(await removeCartLines(input.cartId, input.lineIds))),
+  }),
+});
+export type CommerceRouter = typeof commerceRouter;

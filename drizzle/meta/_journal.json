@@ -1,0 +1,41 @@
+{
+  "version": "7",
+  "dialect": "mysql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1787469662531,
+      "tag": "0000_melodic_joystick",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1787470285187,
+      "tag": "0001_robust_george_stacy",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1787472501033,
+      "tag": "0002_chubby_gressill",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1787475730167,
+      "tag": "0003_sudden_misty_knight",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1787475930925,
+      "tag": "0004_lying_vindicator",
+      "breakpoints": true
+    }
+  ]
+}

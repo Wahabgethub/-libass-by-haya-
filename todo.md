@@ -1,0 +1,92 @@
+# Project TODO
+
+- [x] Configure Shopify as the catalog, promotion, cart, checkout, payment, and billing provider.
+- [x] Provide the owner handoff to claim the connected Shopify store and enable a live payment method before accepting customer payments.
+- [x] Configure secure Cloudinary and admin-access environment variables.
+- [x] Define storefront data contracts for products, collections, sale pricing, variants, and category imagery.
+- [x] Create the premium Libaas by HAYA visual system, including typography, color tokens, and refined motion rules.
+- [x] Build responsive storefront navigation, announcement banner, hero, editorial collection discovery, and brand storytelling.
+- [x] Build product listing and collection browsing with sale pricing, badges, and responsive product cards.
+- [x] Build product detail pages with gallery, descriptions, size and variant selection, and add-to-cart controls.
+- [x] Build a shopping cart with quantity controls, order summary, and checkout handoff.
+- [x] Surface connected-store promotions and sale products in the storefront.
+- [x] Build password-protected admin entry and administrator workspace.
+- [x] Build Cloudinary configuration, clothing image upload, image selection, and category photo assignment workflows.
+- [x] Build admin category management and sales-management controls.
+- [x] Add automated unit tests for authentication, commerce adapter behavior, and protected admin functions.
+- [x] Verify desktop and mobile layouts, navigation, cart interactions, and reduced-motion behavior.
+- [x] Surface current sale pricing from connected-store compare-at prices; Shopify discount codes remain intentionally confined to Shopify checkout rather than exposed on the storefront.
+- [x] Add explicit category-cover image selection from previously uploaded Cloudinary images.
+- [x] Add a clear Shopify-admin sales-management handoff from the protected studio, preserving Shopify as the system of record for prices and promotions.
+- [x] Add tests for protected admin procedures, including invalid-token rejection and valid access.
+- [x] Verify reduced-motion behavior explicitly in the browser and record the result.
+- [x] Explicitly test the motion-suppression styles in a browser override and record the observed interaction behavior.
+- [x] Create a final checkpoint after all implementation and verification items are complete.
+- [x] Review payment-safety requirements and document the limits of IBAN-based payments versus card processing.
+- [x] Define custom order, payment-method, bank-transfer reference, and receipt persistence models.
+- [x] Add an animated Lookbook / Style Gallery using the supplied three-piece suit imagery.
+- [x] Add a horizontally scrollable product-view gallery so customers can inspect every supplied clothing angle.
+- [x] Update product presentation for a three-piece suit without size selection.
+- [x] Add a custom checkout with Cash on Delivery and manual Bank Alfalah transfer choices.
+- [x] Create an order-confirmation receipt with order, product, customer, delivery, and payment-detail summaries.
+- [x] Prepare a receipt email handoff and document the separate transactional-email configuration requirement.
+- [x] Verify responsive gallery, checkout, payment-choice, and receipt flows.
+- [x] Wire all supplied three-piece-suit images into a live multi-angle product experience and verify horizontal browsing.
+- [x] Create and publish a three-piece suit product without size options, then verify its product page hides size selection.
+- [x] Create a non-financial end-to-end local test order and verify the generated customer receipt page.
+- [x] Create a follow-up checkpoint for the lookbook and custom checkout extension.
+- [x] Remove manual bank-transfer and online-payment choices so checkout supports Cash on Delivery only.
+- [x] Establish the dark charcoal, white, and acid-lime Libaas kinetic design system.
+- [x] Create cinematic fabric-motion artwork for the immersive hero.
+- [x] Rebuild the sticky header, immersive hero, product grid, and horizontal lookbook with kinetic interactions.
+- [x] Add technical-fabric storytelling, dynamic cart polish, and a large animated footer marquee.
+- [x] Verify kinetic motion, contrast, desktop/mobile layouts, and COD-only checkout behavior.
+- [x] Create a follow-up checkpoint for the kinetic redesign.
+- [x] Require customer email, phone, address, and COD confirmation during order placement.
+- [x] Create full itemized COD receipts containing customer, delivery, product, total, and order-status information.
+- [x] Replace automated receipt-email delivery with protected admin-only retention of each customer email and order record.
+- [x] Add protected administrator order list, order detail, and fulfillment-status management.
+- [x] Use styled regular-and-sale price presentation that follows the supplied PKR price reference.
+- [x] Verify the complete customer order and protected administrator workflow through focused protected-route tests and live admin-ledger rendering.
+- [x] Remove automatic customer receipt-email delivery and keep the customer email as protected admin order data only.
+- [x] Show each customer’s email, phone, address, products, quantities, order total, and fulfillment status in the protected admin workspace.
+- [x] Verify a non-financial COD order, its receipt fields, and fulfillment status with focused route tests that do not seed real customer data.
+- [x] Verify stored COD-order customer, product, quantity, total, and fulfillment fields with protected administrator-ledger route tests.
+- [x] Verify fulfillment-status update behavior and add focused coverage for protected COD order procedures.
+- [x] Extend COD receipt tests to explicitly assert customer name, email, phone, address, item quantity, subtotal, total, and fulfillment status together.
+- [x] Extend protected admin-order tests to assert complete customer, delivery, item-quantity, total, and fulfillment data in the order detail route.
+- [x] Replace oversized kinetic typography and marquee motion with a quieter luxury type scale and subtle animated background treatment.
+- [x] Add a protected sales manager where the administrator can set a regular price, sale price, and optional percentage discount per product.
+- [x] Persist sale-price overrides and capture the effective regular and sale price on each custom COD order item.
+- [x] Display administrator-configured sale pricing consistently in catalog cards, product details, checkout totals, and customer receipts.
+- [x] Verify sale updates, crossed-out regular prices, discounted prices, and order-bill price snapshots across desktop and mobile.
+- [x] Add a protected admin product list with a confirmed product-deletion action and post-deletion catalog refresh.
+- [x] Create a live admin sale override and verify its crossed-out and discounted prices in the shop, product, checkout, and receipt views.
+- [x] Place a non-financial COD test order with an active sale to verify immutable regular-and-sale snapshots in the receipt and protected admin order detail.
+- [x] Execute protected storefront removal on the authorized Sandstone Column Abaya and verify it is absent from the public shop and direct product route after refresh.
+- [x] Clarify in the studio that product deletion removes the item from the Libaas storefront while Shopify source records remain available for store administration.
+- [x] Diagnose and fix the Studio Gallery Media image-upload workflow so it provides a clear working upload path.
+- [x] Add product-specific multi-view garment media management, including configurable labels such as front, back, detail, and editorial view.
+- [x] Display administrator-selected multi-view gallery images in the public product experience in the chosen order and labels.
+- [x] Add a genuine customer-review section and order-linked review submission workflow without fabricated reviews or ratings.
+- [x] Add protected delivery settings for a centralized per-order delivery fee and a free-delivery switch.
+- [x] Apply delivery rules consistently to COD checkout totals, receipt totals, stored order snapshots, and protected order details.
+- [x] Scale Studio to browse up to 1,000 stored COD orders and up to 1,000 catalog products with practical pagination or progressive loading.
+- [x] Complete non-destructive media, view-assignment, delivery, and administration verification; defer any live genuine-customer review-submission check because the user directed no further verification and no real customer order may be invented.
+- [x] Add a protected Studio action to remove a product from the Libaas website while preserving historic COD order snapshots.
+- [x] Add protected deletion of Cloudinary-managed category/media assets with clear confirmation and error feedback.
+- [x] Verify protected product-removal behavior with isolated tests and the authorized live Sandstone Column Abaya storefront removal after confirmation.
+- [x] Defer Cloudinary-managed media deletion verification at the user’s direction; no recorded asset was created or removed.
+- [x] Respect the user-directed deferral of live Cloudinary deletion and real-customer review verification; retain all unrelated assets and records unchanged.
+- [x] Complete rapid non-destructive final verification of the cinematic entry, local-first Studio, reviews, delivery, and deletion safeguards.
+- [x] Ensure every visitor sees the refined Libaas by HAYA cinematic introduction on entering the website, with an accessible collection-entry action and reduced-motion support.
+- [x] Verify cinematic introduction display and collection entry on desktop and mobile without obscuring normal storefront navigation.
+- [x] Remove platform-managed database dependency from core Libaas features and provide local-first persistence that works after download.
+- [x] Audit and document all remaining optional external services and local environment variables required for catalog synchronization or hosted media.
+- [x] Verify the downloaded application can start locally and supports the core Studio and COD workflows without a remote database.
+- [x] Create a restrained cinematic Libaas by HAYA introduction with fabric, tailoring, collection, and COD brand-story beats.
+- [x] Correct the visible and project-facing brand spelling to LIBAAS / Libaas by HAYA without changing commerce behavior.
+- [x] Replace remaining project-facing legacy brand references in handoff and verification documentation, preserving only intentional local-data identifiers; the unused generic template snapshot remains excluded from runtime output.
+- [x] Complete a repository-wide Libaas spelling audit and document the intentionally retained local compatibility identifiers.
+- [x] Prepare a complete downloadable-code and free external-hosting handoff, clearly documenting the local-persistence and upload limitations of serverless platforms.
+- [x] Provide a complete AWS Free Tier deployment procedure for the current full-stack Libaas app, including persistent local data, uploads, secrets, HTTPS, and backup safeguards.
