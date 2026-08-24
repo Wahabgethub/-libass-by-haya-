@@ -21,10 +21,18 @@ const redirectToLoginIfUnauthorized = (error: unknown) => {
   startLogin();
 };
 
+const lockExpiredStudioSession = (error: unknown) => {
+  if (!(error instanceof TRPCClientError) || typeof window === "undefined") return;
+  if (error.data?.code !== "FORBIDDEN" || !/admin session (has expired|is invalid)/i.test(error.message)) return;
+  localStorage.removeItem("libass-by-haya:admin-token");
+  window.dispatchEvent(new Event("libaas:studio-session-expired"));
+};
+
 queryClient.getQueryCache().subscribe(event => {
   if (event.type === "updated" && event.action.type === "error") {
     const error = event.query.state.error;
     redirectToLoginIfUnauthorized(error);
+    lockExpiredStudioSession(error);
     console.error("[API Query Error]", error);
   }
 });
@@ -33,6 +41,7 @@ queryClient.getMutationCache().subscribe(event => {
   if (event.type === "updated" && event.action.type === "error") {
     const error = event.mutation.state.error;
     redirectToLoginIfUnauthorized(error);
+    lockExpiredStudioSession(error);
     console.error("[API Mutation Error]", error);
   }
 });

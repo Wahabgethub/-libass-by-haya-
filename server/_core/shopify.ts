@@ -27,7 +27,8 @@ import {
   normalizeCollection,
   normalizeProduct,
 } from "./shopifyNormalize";
-import { addLocalCartLines, createLocalCart, getLocalCart, getLocalProductByHandle, listLocalProducts, removeLocalCartLines, updateLocalCartLines } from "../localCommerce";
+import { addLocalCartLines, createLocalCart, getLocalCart, getLocalProductByHandle, listLocalProducts, removeLocalCartLines, setSupplementalLocalProducts, updateLocalCartLines } from "../localCommerce";
+import { listProductMedia, listPublishedStudioSuits } from "../db";
 
 // ---------------------------------------------------------------------------
 // Configuration
@@ -274,10 +275,14 @@ export type ListProductsOptions = {
   collectionHandle?: string;
 };
 
+const studioMoney = (amount: string) => ({ amount, currencyCode: "PKR" as const });
+async function publishedStudioProducts(): Promise<Product[]> { return Promise.all((await listPublishedStudioSuits()).map(async suit => { const media = await listProductMedia(suit.productHandle); const validSalePrice = suit.salePrice && Number(suit.salePrice) > 0 && Number(suit.salePrice) < Number(suit.regularPrice) ? suit.salePrice : null; const price = validSalePrice ?? suit.regularPrice; return { id: `studio-product-${suit.id}`, handle: suit.productHandle, title: suit.title, description: suit.description, descriptionHtml: "", productType: "Three-piece suit", vendor: "Libaas by HAYA", tags: ["3 pc", "three piece", "suit", "studio"], images: media.map(item => ({ url: item.imageUrl, altText: item.altText ?? item.title, viewLabel: item.viewLabel })), priceRange: { min: studioMoney(price), max: studioMoney(price) }, options: [{ name: "Title", values: ["Default Title"] }], variants: [{ id: `studio-${suit.productHandle}-default`, title: "Default Title", price: studioMoney(price), compareAtPrice: validSalePrice ? studioMoney(suit.regularPrice) : null, availableForSale: true, selectedOptions: [{ name: "Title", value: "Default Title" }] }] } satisfies Product; })); }
+async function prepareStudioLocalProducts() { const products = await publishedStudioProducts(); setSupplementalLocalProducts(products); return products; }
+
 export async function listProducts(
   options: ListProductsOptions = {}
 ): Promise<Product[]> {
-  if (!isShopifyConfigured()) return listLocalProducts(options.first ?? 24);
+  if (!isShopifyConfigured()) { const studio = await prepareStudioLocalProducts(); const local = listLocalProducts(1000); return [...local, ...studio.filter(item => !local.some(existing => existing.handle === item.handle))].slice(0, options.first ?? 24); }
   const target = Math.min(Math.max(options.first ?? 24, 1), 1000);
   const first = Math.min(target, 250);
 
@@ -315,10 +320,12 @@ export async function listProducts(
     products.push(...data.products.edges.map((edge: { node: RawProduct }) => edge.node));
     after = data.products.pageInfo?.hasNextPage ? data.products.pageInfo.endCursor : null;
   } while (after && products.length < target);
-  return products.slice(0, target).map(normalizeProduct);
+  const studio = await publishedStudioProducts(); const shopify = products.slice(0, target).map(normalizeProduct); return [...shopify, ...studio.filter(item => !shopify.some(existing => existing.handle === item.handle))].slice(0, target);
 }
 
 export async function getProductByHandle(handle: string): Promise<Product> {
+  const studio = (await prepareStudioLocalProducts()).find(item => item.handle === handle);
+  if (studio) return studio;
   if (!isShopifyConfigured()) return getLocalProductByHandle(handle);
   const data = await storefrontFetch<{ productByHandle: RawProduct | null }>(
     `${PRODUCT_FRAGMENT}
@@ -379,6 +386,7 @@ type CartMutationResponse<K extends string> = Record<
 >;
 
 export async function createCart(lines: CartLineInput[]): Promise<Cart> {
+  if (lines.some(line => line.variantId.startsWith("studio-"))) { if (!lines.every(line => line.variantId.startsWith("studio-"))) throw new TRPCError({ code: "BAD_REQUEST", message: "Order Studio suits separately from Shopify catalog items." }); await prepareStudioLocalProducts(); return createLocalCart(lines); }
   if (!isShopifyConfigured()) return createLocalCart(lines);
   const data = await storefrontFetch<CartMutationResponse<"cartCreate">>(
     `${CART_FRAGMENT}
@@ -398,6 +406,7 @@ export async function createCart(lines: CartLineInput[]): Promise<Cart> {
 }
 
 export async function getCart(cartId: string): Promise<Cart | null> {
+  if (cartId.startsWith("local-cart-")) return getLocalCart(cartId);
   if (!isShopifyConfigured()) return getLocalCart(cartId);
   const data = await storefrontFetch<{ cart: RawCart | null }>(
     `${CART_FRAGMENT}
@@ -413,6 +422,7 @@ export async function addCartLines(
   cartId: string,
   lines: CartLineInput[]
 ): Promise<Cart> {
+  if (cartId.startsWith("local-cart-")) { await prepareStudioLocalProducts(); return addLocalCartLines(cartId, lines); }
   if (!isShopifyConfigured()) return addLocalCartLines(cartId, lines);
   const data = await storefrontFetch<CartMutationResponse<"cartLinesAdd">>(
     `${CART_FRAGMENT}
@@ -434,6 +444,7 @@ export async function updateCartLines(
   cartId: string,
   updates: CartLineUpdate[]
 ): Promise<Cart> {
+  if (cartId.startsWith("local-cart-")) return updateLocalCartLines(cartId, updates);
   if (!isShopifyConfigured()) return updateLocalCartLines(cartId, updates);
   const data = await storefrontFetch<CartMutationResponse<"cartLinesUpdate">>(
     `${CART_FRAGMENT}
@@ -455,6 +466,7 @@ export async function removeCartLines(
   cartId: string,
   lineIds: string[]
 ): Promise<Cart> {
+  if (cartId.startsWith("local-cart-")) return removeLocalCartLines(cartId, lineIds);
   if (!isShopifyConfigured()) return removeLocalCartLines(cartId, lineIds);
   const data = await storefrontFetch<CartMutationResponse<"cartLinesRemove">>(
     `${CART_FRAGMENT}

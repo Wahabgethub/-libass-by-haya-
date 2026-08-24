@@ -6,6 +6,8 @@ import type { TrpcContext } from "./_core/context";
 const dbMocks = vi.hoisted(() => ({
   getSaleOverridesByHandles: vi.fn().mockResolvedValue(new Map()),
   listHiddenProductHandles: vi.fn().mockResolvedValue(new Set<string>()),
+  listPublishedStudioSuits: vi.fn().mockResolvedValue([]),
+  listProductMedia: vi.fn().mockResolvedValue([]),
 }));
 
 vi.mock("./db", async importOriginal => {
@@ -14,6 +16,8 @@ vi.mock("./db", async importOriginal => {
     ...actual,
     getSaleOverridesByHandles: dbMocks.getSaleOverridesByHandles,
     listHiddenProductHandles: dbMocks.listHiddenProductHandles,
+    listPublishedStudioSuits: dbMocks.listPublishedStudioSuits,
+    listProductMedia: dbMocks.listProductMedia,
   };
 });
 
@@ -37,6 +41,10 @@ beforeEach(() => {
   dbMocks.getSaleOverridesByHandles.mockResolvedValue(new Map());
   dbMocks.listHiddenProductHandles.mockReset();
   dbMocks.listHiddenProductHandles.mockResolvedValue(new Set<string>());
+  dbMocks.listPublishedStudioSuits.mockReset();
+  dbMocks.listPublishedStudioSuits.mockResolvedValue([]);
+  dbMocks.listProductMedia.mockReset();
+  dbMocks.listProductMedia.mockResolvedValue([]);
   vi.stubGlobal("fetch", fetchMock);
   process.env.SHOPIFY_STORE_DOMAIN = "test.myshopify.com";
   process.env.SHOPIFY_STOREFRONT_API_ACCESS_TOKEN = "test-token";

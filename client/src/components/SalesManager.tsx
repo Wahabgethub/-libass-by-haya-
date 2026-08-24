@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { formatMoney } from "@/lib/money";
 import { trpc } from "@/lib/trpc";
+import { useStudioPanelRoot } from "@/components/useStudioPanelRoot";
 import { BadgePercent, Loader2, Trash2 } from "lucide-react";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
@@ -48,6 +49,14 @@ export function SalesManager({ adminToken }: { adminToken: string }) {
     },
     onError: error => toast.error(error.message),
   });
+  const removeWithManagedMedia = trpc.admin.products.removeWithManagedMedia.useMutation({
+    onSuccess: async result => {
+      await Promise.all([utils.commerce.products.invalidate(), utils.admin.media.list.invalidate()]);
+      toast.success(`Product removed from the storefront and ${result.removedMedia} attached local gallery view${result.removedMedia === 1 ? "" : "s"} deleted.`);
+      setHandle("");
+    },
+    onError: error => toast.error(error.message),
+  });
 
   function submit(event: FormEvent) {
     event.preventDefault();
@@ -66,7 +75,7 @@ export function SalesManager({ adminToken }: { adminToken: string }) {
     });
   }
 
-  const studioMain = document.querySelector("main");
+  const studioMain = useStudioPanelRoot();
   if (!studioMain) return null;
 
   return createPortal(
@@ -126,6 +135,9 @@ export function SalesManager({ adminToken }: { adminToken: string }) {
           <p className="mt-2 text-xs leading-5 text-white/45">
             Removing a product hides it from the Libaas public storefront. Its Shopify source product and historical COD records remain available.
           </p>
+          <p className="mt-2 text-xs leading-5 text-red-100/65">
+            The stronger delete action below also permanently deletes only this product’s locally managed suit gallery. Cloudinary category images are separate assets and are never deleted by product removal unless you delete them in the Cloudinary library.
+          </p>
           <div className="mt-5 flex flex-wrap gap-3">
             <Button type="submit" disabled={!product || !regular || save.isPending} className="rounded-none bg-[#e1c27a] font-mono text-[10px] tracking-[.13em] text-[#171417] uppercase hover:bg-white">
               {save.isPending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
@@ -144,6 +156,21 @@ export function SalesManager({ adminToken }: { adminToken: string }) {
             >
               <Trash2 className="h-3.5 w-3.5" />
               Remove from storefront
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={!product || removeWithManagedMedia.isPending}
+              onClick={() => {
+                if (product && window.confirm(`Permanently remove ${product.title} from the public Libaas storefront and delete its attached local suit-gallery images? Historic COD orders remain protected. This does not delete unrelated Cloudinary category assets.`)) {
+                  removeWithManagedMedia.mutate({ adminToken, productHandle: product.handle, confirmation: "DELETE_PRODUCT_AND_MEDIA" });
+                }
+              }}
+              className="rounded-none border-red-300/75 bg-red-300/10 font-mono text-[10px] tracking-[.13em] text-red-100 uppercase hover:bg-red-300 hover:text-[#171417]"
+            >
+              {removeWithManagedMedia.isPending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+              <Trash2 className="h-3.5 w-3.5" />
+              Remove product + managed views
             </Button>
           </div>
         </form>

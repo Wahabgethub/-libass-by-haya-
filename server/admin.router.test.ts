@@ -2,6 +2,8 @@ import { describe, expect, it, vi } from "vitest";
 
 const dbMocks = vi.hoisted(() => ({
   hideStoreProduct: vi.fn().mockResolvedValue(undefined),
+  deleteProductMediaForProduct: vi.fn().mockResolvedValue([{ id: 1 }, { id: 2 }]),
+  createStudioSuit: vi.fn().mockResolvedValue({ id: 1, title: "Midnight Rose", handle: "midnight-rose" }),
   upsertSaleOverride: vi.fn().mockResolvedValue({
     id: 1,
     productHandle: "test-product",
@@ -14,7 +16,7 @@ const dbMocks = vi.hoisted(() => ({
 
 vi.mock("./db", async importOriginal => {
   const actual = await importOriginal<typeof import("./db")>();
-  return { ...actual, hideStoreProduct: dbMocks.hideStoreProduct, upsertSaleOverride: dbMocks.upsertSaleOverride };
+  return { ...actual, hideStoreProduct: dbMocks.hideStoreProduct, deleteProductMediaForProduct: dbMocks.deleteProductMediaForProduct, createStudioSuit: dbMocks.createStudioSuit, upsertSaleOverride: dbMocks.upsertSaleOverride };
 });
 
 import { issueAdminAccessToken } from "./adminAuth";
@@ -72,5 +74,22 @@ describe("admin router protection", () => {
 
     await expect(caller.products.remove({ adminToken: token, productHandle: "test-product" })).resolves.toBeUndefined();
     expect(dbMocks.hideStoreProduct).toHaveBeenCalledWith("test-product");
+  });
+
+  it("requires an explicit confirmation token before removing a product and its managed local gallery", async () => {
+    const caller = adminRouter.createCaller(createContext());
+    const token = issueAdminAccessToken("1122");
+
+    await expect(caller.products.removeWithManagedMedia({ adminToken: token, productHandle: "test-product", confirmation: "DELETE_PRODUCT_AND_MEDIA" })).resolves.toEqual({ removedMedia: 2 });
+    expect(dbMocks.deleteProductMediaForProduct).toHaveBeenCalledWith("test-product");
+    expect(dbMocks.hideStoreProduct).toHaveBeenCalledWith("test-product");
+  });
+
+  it("creates a protected Studio suit draft before its required garment-image set is uploaded", async () => {
+    const caller = adminRouter.createCaller(createContext());
+    const token = issueAdminAccessToken("1122");
+
+    await expect(caller.suits.create({ adminToken: token, title: "Midnight Rose", handle: "midnight-rose" })).resolves.toMatchObject({ title: "Midnight Rose", handle: "midnight-rose" });
+    expect(dbMocks.createStudioSuit).toHaveBeenCalledWith({ adminToken: token, title: "Midnight Rose", handle: "midnight-rose" });
   });
 });

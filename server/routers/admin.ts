@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { assertValidAdminAccessToken, issueAdminAccessToken } from "../adminAuth";
 import { deleteCloudinaryImage, getCloudinaryUploadSignature } from "../cloudinary";
-import { addCategoryImage, addProductMedia, createStoreCategory, deleteCategoryImage, deleteProductMedia, getCategoryImageById, getDeliverySettings, getStoreOrderByNumber, hideStoreProduct, listAllCategoryImages, listAllReviews, listCategoryImages, listProductMedia, listSaleOverrides, listStoreCategories, listStoreOrders, listStoreOrdersPage, saveLocalImageUpload, updateDeliverySettings, updateReviewStatus, updateStoreCategoryHeroImage, updateStoreOrderFulfillmentStatus, upsertSaleOverride } from "../db";
+import { addCategoryImage, addProductMedia, createStoreCategory, createStudioSuit, deleteCategoryImage, deleteMotionMedia, deleteProductMedia, deleteProductMediaForProduct, getCategoryImageById, getDeliverySettings, getStoreOrderByNumber, hideStoreProduct, listAllCategoryImages, listAllReviews, listCategoryImages, listMotionMedia, listProductMedia, listPublishedStudioSuits, listSaleOverrides, listStoreCategories, listStoreOrders, listStoreOrdersPage, listStudioSuits, listSuitFilterMeta, publishStudioSuit, reorderMotionMedia, reorderProductMedia, saveLocalImageUpload, updateDeliverySettings, updateReviewStatus, updateStoreCategoryHeroImage, updateStoreOrderFulfillmentStatus, upsertSaleOverride, upsertSuitFilterMeta } from "../db";
 import { publicProcedure, router } from "../_core/trpc";
 const adminToken = z.string().min(32); const adminOnly = (token: string) => assertValidAdminAccessToken(token);
 export const adminRouter = router({
@@ -26,11 +26,28 @@ export const adminRouter = router({
   }),
   products: router({
     remove: publicProcedure.input(z.object({ adminToken, productHandle: z.string().min(1).max(180) })).mutation(({ input }) => { adminOnly(input.adminToken); return hideStoreProduct(input.productHandle); }),
+    removeWithManagedMedia: publicProcedure.input(z.object({ adminToken, productHandle: z.string().min(1).max(180), confirmation: z.literal("DELETE_PRODUCT_AND_MEDIA") })).mutation(async ({ input }) => { adminOnly(input.adminToken); const removedMedia = await deleteProductMediaForProduct(input.productHandle); await hideStoreProduct(input.productHandle); return { removedMedia: removedMedia.length }; }),
+  }),
+  suits: router({
+    list: publicProcedure.input(z.object({ adminToken })).query(({ input }) => { adminOnly(input.adminToken); return listStudioSuits(); }),
+    create: publicProcedure.input(z.object({ adminToken, title: z.string().min(2).max(160), handle: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).max(180) })).mutation(({ input }) => { adminOnly(input.adminToken); return createStudioSuit(input); }),
+    published: publicProcedure.input(z.object({ adminToken })).query(({ input }) => { adminOnly(input.adminToken); return listPublishedStudioSuits(); }),
+    publish: publicProcedure.input(z.object({ adminToken, productHandle: z.string().min(1).max(180), title: z.string().min(2).max(160), description: z.string().min(10).max(2000), regularPrice: z.string().regex(/^\d+(?:\.\d{1,2})?$/), salePrice: z.string().regex(/^\d+(?:\.\d{1,2})?$/).optional() })).mutation(async ({ input }) => { adminOnly(input.adminToken); if ((await listProductMedia(input.productHandle)).length < 3) throw new Error("Add Front, Back, and Detail images before publishing this suit."); return publishStudioSuit(input); }),
+  }),
+  suitFilters: router({
+    list: publicProcedure.input(z.object({ adminToken })).query(({ input }) => { adminOnly(input.adminToken); return listSuitFilterMeta(); }),
+    save: publicProcedure.input(z.object({ adminToken, productHandle: z.string().min(1).max(180), color: z.string().min(1).max(60), style: z.string().min(1).max(60), season: z.string().min(1).max(60) })).mutation(({ input }) => { adminOnly(input.adminToken); return upsertSuitFilterMeta(input); }),
   }),
   media: router({
     list: publicProcedure.input(z.object({ adminToken, productHandle: z.string().min(1).max(180) })).query(({ input }) => { adminOnly(input.adminToken); return listProductMedia(input.productHandle); }),
-    upload: publicProcedure.input(z.object({ adminToken, productHandle: z.string().min(1).max(180), title: z.string().min(1).max(160), viewLabel: z.enum(["front", "back", "detail", "editorial", "other"]), sortOrder: z.number().int().min(0).max(9999), fileName: z.string().min(1).max(255), mimeType: z.enum(["image/jpeg", "image/png", "image/webp"]), dataUrl: z.string().startsWith("data:image/"), altText: z.string().max(255).optional() })).mutation(async ({ input }) => { adminOnly(input.adminToken); const uploaded = await saveLocalImageUpload(input); return addProductMedia({ ...input, imageUrl: uploaded.url, storageKey: uploaded.storageKey }); }),
+    upload: publicProcedure.input(z.object({ adminToken, productHandle: z.string().min(1).max(180), title: z.string().min(1).max(160), viewLabel: z.enum(["front", "back", "detail", "editorial", "other"]), sortOrder: z.number().int().min(0).max(5), fileName: z.string().min(1).max(255), mimeType: z.enum(["image/jpeg", "image/png", "image/webp"]), dataUrl: z.string().startsWith("data:image/"), altText: z.string().max(255).optional() })).mutation(async ({ input }) => { adminOnly(input.adminToken); const uploaded = await saveLocalImageUpload(input); return addProductMedia({ ...input, imageUrl: uploaded.url, storageKey: uploaded.storageKey }); }),
     remove: publicProcedure.input(z.object({ adminToken, id: z.number().int().positive() })).mutation(({ input }) => { adminOnly(input.adminToken); return deleteProductMedia(input.id); }),
+    reorder: publicProcedure.input(z.object({ adminToken, productHandle: z.string().min(1).max(180), ids: z.array(z.number().int().positive()).min(1).max(6) })).mutation(({ input }) => { adminOnly(input.adminToken); return reorderProductMedia(input); }),
+  }),
+  motion: router({
+    list: publicProcedure.input(z.object({ adminToken })).query(({ input }) => { adminOnly(input.adminToken); return listMotionMedia(); }),
+    remove: publicProcedure.input(z.object({ adminToken, id: z.number().int().positive() })).mutation(({ input }) => { adminOnly(input.adminToken); return deleteMotionMedia(input.id); }),
+    reorder: publicProcedure.input(z.object({ adminToken, ids: z.array(z.number().int().positive()).min(1).max(6) })).mutation(({ input }) => { adminOnly(input.adminToken); return reorderMotionMedia(input.ids); }),
   }),
   cloudinary: router({
     status: publicProcedure.input(z.object({ adminToken })).query(({ input }) => { adminOnly(input.adminToken); return { connected: Boolean(process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET) }; }),

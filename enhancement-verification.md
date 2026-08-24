@@ -49,3 +49,47 @@ The user subsequently directed that no further live Cloudinary deletion or genui
 At the user’s direction, all active storefront and Studio labels were corrected to **Libaas / LIBAAS by HAYA**. The browser document title, cinematic entry, navigation, footer, checkout, receipt, Studio messages, local fallback catalog vendor metadata, and local-run guide now use the corrected spelling. The live home page rendered the required cinematic entry with the updated name, and its document title was confirmed as **“Libaas by HAYA — Modern Modest Fashion.”** Type checking passed, and the full automated suite passed with **15 test files, 28 passing tests, and 1 skipped test**. A focused title test also validates the configured `VITE_APP_TITLE` against the served storefront entry document.
 
 The final repository audit found no remaining outdated user-facing brand text in active source, runtime documentation, or verification records. The only intentionally retained legacy-form identifiers are compatibility-only local filenames, browser-storage keys, environment-variable names, the existing project folder/package identifier, and immutable third-party asset or Shopify-domain URLs. These are not rendered as the Libaas brand and were preserved to avoid breaking local persistence, existing carts/receipts, or remote asset references. The generic `template.json` snapshot is not used by this active project runtime and remains excluded from storefront output.
+
+## 2026-08-23 — Isolated suit galleries and Cut to Move controls
+
+The refreshed public Azure Garden route displayed a **Private suit gallery / 2 views** with only Azure-specific images, a horizontal gallery, per-view counters, and keyboard-accessible previous/next controls. The page no longer applies a shared Azure fallback to any other three-piece suit with a short image list.
+
+The protected Studio displayed separate **Six separate views per suit** and **Cut to Move media** panels. The suit panel requires selecting a suit before upload, states the six-view capacity, and exposes per-suit order and removal controls. The Cut to Move panel starts independently at `0 / 6`, offers its own upload and ordering controls, and leaves the existing editorial fallback visible until an administrator adds a dedicated motion frame. The stronger product removal action states that it deletes only attached local gallery media; unrelated Cloudinary category images remain separately managed and are not selected or deleted automatically.
+
+The homepage was also rechecked through the mandatory cinematic entry. After entering the collection, **Cut to Move** rendered its fallback frame as **frame 1 of 1**, alongside the updated Studio-managed-motion description. This confirms that the public section remains functional before the administrator uploads its first dedicated motion frame.
+
+## 2026-08-23 — Studio recovery and guided suit upload
+
+The reported multi-error Studio state was traced to an expired or invalid local Studio session token, which can make every protected panel fail at once, and to fragile portals targeting the first generic `<main>` element. The Studio now clears an expired/invalid token and returns to one clean passcode gate with a single session-expired explanation. All management panels now wait for and mount into a dedicated `studio-panels` container, avoiding the mobile portal overlap shown in the administrator screenshot.
+
+The garment workflow now begins with **Create a suit**. The new suit is stored locally as a Studio draft and then selected for image management. Its initial image chooser requires at least three images in the same batch—front, back, and detail—before the dashboard marks the suit **Ready: 3+ images**. The system remains capped at six isolated, ordered images per suit. The focused route and local-store tests passed, and the full suite passed with **15 test files, 32 tests passed, and 1 skipped test**.
+
+The initial three-image requirement was subsequently moved into the authenticated multipart endpoint as well: a new Studio draft is rejected unless its first request contains at least three labeled images. The Studio panels now wait for their dedicated mount container before rendering. The administrator unlocked the repaired mobile preview and confirmed that **Create a suit, then add 3 images** is visible without the previous multi-error state.
+
+The server-side first-upload rule was strengthened to require the exact **front**, **back**, and **detail** labels—not merely any three images—for a brand-new Studio draft. Type checking and the focused local-store and protected-router regression tests passed after this safeguard.
+
+## 2026-08-23 — Catalog filter control verification
+
+The live public `/shop` route rendered the new accessible **Color**, **Style**, and **Season** select controls above the catalog. After the commerce query settled, the available Azure Garden suit rendered normally with its sale price and its `Three-Piece Suit` style option. Color and season choices remain intentionally empty until the administrator saves those discovery labels in the new protected **Visitor filters** Studio panel; the storefront retains its unfiltered catalog while no labels are assigned.
+
+The mobile shop view was captured at 375 × 812. The three filter controls stack with full-width touch targets above the remaining suit card, and the catalog, COD visual treatment, and footer remain readable without horizontal overflow. Studio now includes **Visitor filters** for persistent color, style, and season metadata and **Editorial order** for native drag-and-drop ordering of views four through six. The server rejects any attempted reorder that moves front, back, or detail out of their required first three positions. `VSCODE_CLAUDE_HANDOFF.md` documents the repair history, local backup commands, filter workflow, and a safe prompt for future full-file `cat` commands.
+
+## 2026-08-24 — One-at-a-time view workflow
+
+The public Azure Garden product route now renders a single large main image with explicit **Front** and **Back** selectable thumbnail buttons, previous/next controls, and a horizontally scrollable view strip. The current source product has two views; a Studio-managed suit will display **Front**, **Back**, and **Detail** in the same interaction pattern as those views are uploaded one at a time. The server guides a new Studio suit through that order and preserves gallery isolation and the six-image maximum.
+
+## 2026-08-24 — Studio publish visibility check
+
+The administrator published a Studio suit and it appeared as a second public collection card with its own local garment image. During the check, its entered sale price was `0`, which would have produced an invalid 100% sale. The publication rule now rejects zero or negative sale prices and the catalog safely falls back to the regular price until the administrator replaces that invalid value with an optional valid lower sale price.
+
+The published suit’s public route was then verified. It resolves as a COD-ready three-piece product, shows its PKR 449 regular price without the invalid sale badge, and exposes exactly three selectable local thumbnails: **Front**, **Back**, and **Detail**. The single main image changes through the labeled thumbnail strip or next/previous controls. This confirms the Studio draft can become a public collection item with its own isolated product gallery and price.
+
+## 2026-08-24 — Authorized oversized media cleanup
+
+The user explicitly authorized deletion of the four local upload files that blocked checkpoint creation. The cleanup removed the three attached Midnight suit gallery records—Front, Back, and Detail—and the separate Cut to Move motion-image record using the established record-and-file cleanup helpers. No Shopify source product, Cloudinary category asset, Azure Garden media, hidden-product setting, or COD history was changed. A file-size scan confirmed that no upload larger than 1 MB remains in `data/uploads/`.
+
+The post-cleanup checkpoint completed successfully as version `599387ad`. The published Midnight suit record remains in the public catalog at its regular price but no longer has local gallery media; replacement images can be added later through the guided Studio workflow.
+
+## 2026-08-24 — Owner-directed deferral of replacement media
+
+The owner explicitly chose not to add replacement garment images at this time. Accordingly, no further live Front/Back/Detail uploads, visitor-filter selections, editorial drag interactions, bag additions, COD receipt submissions, customer orders, or reviews were created. The associated Studio and storefront capabilities remain implemented and covered by the completed automated checks; their optional live demonstrations are deferred until the owner decides to upload new under-1-MB garment images.

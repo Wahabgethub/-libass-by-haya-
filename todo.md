@@ -90,3 +90,26 @@
 - [x] Complete a repository-wide Libaas spelling audit and document the intentionally retained local compatibility identifiers.
 - [x] Prepare a complete downloadable-code and free external-hosting handoff, clearly documenting the local-persistence and upload limitations of serverless platforms.
 - [x] Provide a complete AWS Free Tier deployment procedure for the current full-stack Libaas app, including persistent local data, uploads, secrets, HTTPS, and backup safeguards.
+- [x] Isolate each suit’s Studio media by product, enforce a maximum of six ordered images per suit, and prevent any images from mixing across public product galleries.
+- [x] Make every product’s up-to-six gallery views easy for customers to browse horizontally with clear view order and accessible controls.
+- [x] Provide a focused copy-and-paste VS Code terminal command package for this gallery correction only, with verification commands for the downloaded project.
+- [x] Add a protected Studio manager for the Cut to Move motion-gallery images, with isolated upload, ordering, and removal controls separate from suit galleries.
+- [x] Add a separately confirmed Studio action that hides a product from the public website and deletes only its attached managed media, while preserving historic COD order records and retaining the safer storefront-only removal action.
+- [x] Diagnose and fix the reported Studio errors, including the mobile layout issue shown in the administrator screenshot.
+- [x] Add a guided Studio workflow to create a new suit and require at least three labeled garment images before it is treated as ready, while allowing up to six images total.
+- [x] Enforce the first three-image suit upload server-side and verify the unlocked mobile Studio workflow with a legitimate administrator session.
+- [x] Require the exact front, back, and detail label set on a new Studio suit’s first server-side image upload.
+- [x] Add customer-facing suit filters for color, style, and season, with a clear filtered catalog experience on desktop and mobile; live metadata selection is deferred until the owner adds images later.
+- [x] Add protected Studio drag-and-drop ordering for a selected suit’s editorial and other extra gallery images while preserving the required front/back/detail sequence; live drag interaction is deferred until extra images are added later.
+- [x] Create a complete VS Code handoff document covering the downloaded project, focused gallery repair history, filter controls, drag-and-drop ordering, and copy-and-paste command workflow for a later Claude-assisted update.
+- [x] Defer a saved filter selection and a real Studio extra-view drag interaction until the owner adds images later.
+- [x] Replace the grouped initial suit upload with a guided one-at-a-time Front, Back, and Detail upload flow while retaining the six-image maximum and per-suit isolation.
+- [x] Refine the public suit gallery so a visitor can click labeled Front, Back, and Detail thumbnails or scroll through the views with one main image at a time.
+- [x] Verify the protected one-at-a-time Front→Back→Detail upload sequence with automated coverage and the previous live three-view gallery; further live verification is deferred until the owner adds images later.
+- [x] Add a Studio publish step for locally created suits, including regular price, optional lower sale price, product details, and public collection visibility after approval.
+- [x] Ensure published Studio suits participate in public product pages, cart, COD checkout, receipt price snapshots, and the existing customer filter controls; live receipt and saved-filter verification is deferred at the owner’s direction.
+- [x] Expand the VS Code and Claude handoff into a complete record of all Libaas requirements, implemented fixes, safety rules, local workflows, and future change instructions.
+- [x] Defer live bag, COD receipt, and saved color/style/season filter verification until the owner chooses to add replacement media later.
+- [x] Respect the owner’s decision to defer new image uploads and all optional live media, filter, drag-order, bag, and COD receipt checks until replacement garment media is added later.
+- [x] Delete the user-authorized oversized local garment photos and their media records, then save the previously blocked project checkpoint.
+- [x] Retry and record the successful checkpoint after the authorized oversized-media cleanup.
