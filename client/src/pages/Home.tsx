@@ -8,11 +8,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "wouter";
 
 const HERO_TEXTURE = "/manus-storage/libass-kinetic-fabric-hero_e3ba0419.jpg";
-const LOOKBOOK = [
-  { image: "/manus-storage/libass-azure-garden-three-piece-front_d0597b75.png", title: "Azure Garden / 01", note: "Front form" },
-  { image: "/manus-storage/libass-azure-garden-three-piece-back_738a5f46.png", title: "Azure Garden / 02", note: "Back form" },
-  { image: "/manus-storage/libass-sandstone-abaya_8c142f28.jpg", title: "Sandstone / 03", note: "Drape study" },
-];
+const LOOKBOOK: { image: string; title: string; note: string }[] = [];
 
 export default function Home() {
   const { data: products = [], isLoading } = trpc.commerce.products.list.useQuery({ first: 8 });
