@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { assertValidAdminAccessToken, issueAdminAccessToken } from "../adminAuth";
 import { deleteCloudinaryImage, getCloudinaryUploadSignature } from "../cloudinary";
-import { addCategoryImage, addProductMedia, createStoreCategory, createStudioSuit, deleteCategoryImage, deleteMotionMedia, deleteProductMedia, deleteProductMediaForProduct, getCategoryImageById, getDeliverySettings, getStoreOrderByNumber, hideStoreProduct, listAllCategoryImages, listAllReviews, listCategoryImages, listMotionMedia, listProductMedia, listPublishedStudioSuits, listSaleOverrides, listStoreCategories, listStoreOrders, listStoreOrdersPage, listStudioSuits, listSuitFilterMeta, publishStudioSuit, reorderMotionMedia, reorderProductMedia, saveLocalImageUpload, updateDeliverySettings, updateReviewStatus, updateStoreCategoryHeroImage, updateStoreOrderFulfillmentStatus, upsertSaleOverride, upsertSuitFilterMeta } from "../db";
+import { addCategoryImage, addHomeSectionItem, addProductMedia, createHomeSection, createStoreCategory, createStudioSuit, deleteCategoryImage, deleteHomeSection, deleteHomeSectionItem, deleteMotionMedia, deleteProductMedia, deleteProductMediaForProduct, getCategoryImageById, getDeliverySettings, getStoreOrderByNumber, hideStoreProduct, listAllCategoryImages, listAllReviews, listCategoryImages, listHomeSections, listMotionMedia, listProductMedia, listPublishedStudioSuits, listSaleOverrides, listStoreCategories, listStoreOrders, listStoreOrdersPage, listStudioSuits, listSuitFilterMeta, publishStudioSuit, reorderMotionMedia, reorderProductMedia, saveLocalImageUpload, updateDeliverySettings, updateReviewStatus, updateStoreCategoryHeroImage, updateStoreOrderFulfillmentStatus, upsertSaleOverride, upsertSuitFilterMeta } from "../db";
 import { publicProcedure, router } from "../_core/trpc";
 const adminToken = z.string().min(32); const adminOnly = (token: string) => assertValidAdminAccessToken(token);
 export const adminRouter = router({
@@ -48,6 +48,13 @@ export const adminRouter = router({
     list: publicProcedure.input(z.object({ adminToken })).query(({ input }) => { adminOnly(input.adminToken); return listMotionMedia(); }),
     remove: publicProcedure.input(z.object({ adminToken, id: z.number().int().positive() })).mutation(({ input }) => { adminOnly(input.adminToken); return deleteMotionMedia(input.id); }),
     reorder: publicProcedure.input(z.object({ adminToken, ids: z.array(z.number().int().positive()).min(1).max(6) })).mutation(({ input }) => { adminOnly(input.adminToken); return reorderMotionMedia(input.ids); }),
+  }),
+  homeSections: router({
+    list: publicProcedure.input(z.object({ adminToken })).query(({ input }) => { adminOnly(input.adminToken); return listHomeSections(); }),
+    create: publicProcedure.input(z.object({ adminToken, title: z.string().min(1).max(80) })).mutation(({ input }) => { adminOnly(input.adminToken); return createHomeSection(input); }),
+    remove: publicProcedure.input(z.object({ adminToken, id: z.number().int().positive() })).mutation(({ input }) => { adminOnly(input.adminToken); return deleteHomeSection(input.id); }),
+    addItem: publicProcedure.input(z.object({ adminToken, sectionId: z.number().int().positive(), title: z.string().max(160).optional(), linkProductHandle: z.string().max(180).optional(), fileName: z.string().min(1).max(255), mimeType: z.enum(["image/jpeg", "image/png", "image/webp"]), dataUrl: z.string().startsWith("data:image/"), altText: z.string().max(255).optional() })).mutation(async ({ input }) => { adminOnly(input.adminToken); const uploaded = await saveLocalImageUpload(input); return addHomeSectionItem({ sectionId: input.sectionId, title: input.title ?? "", imageUrl: uploaded.url, storageKey: uploaded.storageKey, altText: input.altText, linkProductHandle: input.linkProductHandle }); }),
+    removeItem: publicProcedure.input(z.object({ adminToken, id: z.number().int().positive() })).mutation(({ input }) => { adminOnly(input.adminToken); return deleteHomeSectionItem(input.id); }),
   }),
   cloudinary: router({
     status: publicProcedure.input(z.object({ adminToken })).query(({ input }) => { adminOnly(input.adminToken); return { connected: Boolean(process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET) }; }),
