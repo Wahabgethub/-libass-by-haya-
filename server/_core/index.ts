@@ -10,7 +10,7 @@ import { registerStorageProxy } from "./storageProxy";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
-import { addMotionMedia, addProductMedia, listMotionMedia, listProductMedia, listStudioSuits, saveLocalImageUpload, MAX_PRODUCT_MEDIA } from "../db";
+import { addMotionMedia, addProductMedia, listMotionMedia, listProductMedia, listStudioSuits, saveImageUpload, MAX_PRODUCT_MEDIA } from "../db";
 import { assertValidAdminAccessToken } from "../adminAuth";
 import { assertNextStudioSuitView } from "../suitMediaRules";
 
@@ -61,7 +61,7 @@ async function startServer() {
       const media = [];
       for (let index = 0; index < files.length; index += 1) {
         const file = files[index]!;
-        const uploaded = await saveLocalImageUpload({ fileName: file.originalname, mimeType: file.mimetype as "image/jpeg" | "image/png" | "image/webp", dataUrl: `data:${file.mimetype};base64,${file.buffer.toString("base64")}` });
+        const uploaded = await saveImageUpload({ fileName: file.originalname, mimeType: file.mimetype as "image/jpeg" | "image/png" | "image/webp", dataUrl: `data:${file.mimetype};base64,${file.buffer.toString("base64")}`, folder: "libaas/suits" });
         media.push(await addProductMedia({ productHandle, title: `${title} ${labels[index]} view`, imageUrl: uploaded.url, storageKey: uploaded.storageKey, viewLabel: labels[index] as "front" | "back" | "detail" | "editorial" | "other", sortOrder: Number.isFinite(sortOrder) ? sortOrder + index : index, altText: altText || undefined }));
       }
       res.status(201).json(media);
@@ -80,7 +80,7 @@ async function startServer() {
       const file = req.file;
       if (!title || !file || !["image/jpeg", "image/png", "image/webp"].includes(file.mimetype) || !file.buffer.length) return res.status(400).json({ message: "Choose a valid Cut to Move image." });
       if ((await listMotionMedia()).length >= MAX_PRODUCT_MEDIA) return res.status(400).json({ message: `Cut to Move can have up to ${MAX_PRODUCT_MEDIA} motion images. Remove a frame before adding another.` });
-      const uploaded = await saveLocalImageUpload({ fileName: file.originalname, mimeType: file.mimetype as "image/jpeg" | "image/png" | "image/webp", dataUrl: `data:${file.mimetype};base64,${file.buffer.toString("base64")}` });
+      const uploaded = await saveImageUpload({ fileName: file.originalname, mimeType: file.mimetype as "image/jpeg" | "image/png" | "image/webp", dataUrl: `data:${file.mimetype};base64,${file.buffer.toString("base64")}`, folder: "libaas/motion" });
       const media = await addMotionMedia({ title, imageUrl: uploaded.url, storageKey: uploaded.storageKey, sortOrder: Number.isFinite(sortOrder) ? sortOrder : 0, altText: altText || undefined });
       res.status(201).json(media);
     } catch (error) {

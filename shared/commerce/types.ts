@@ -64,6 +64,7 @@ export type Product = {
   /** Available option dimensions (e.g. Size, Color) for the variant picker. */
   options: ProductOption[];
   variants: ProductVariant[];
+  colorVariants?: { handle: string; title: string; colorLabel: string; imageUrl: string | null; active: boolean }[];
 };
 
 export type Collection = {
