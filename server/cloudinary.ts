@@ -53,3 +53,19 @@ export async function deleteCloudinaryImage(publicId: string, fetchImpl: typeof 
   if (!response.ok) throw new Error(`Cloudinary image could not be deleted (HTTP ${response.status})`);
   return { deleted: true as const, publicId };
 }
+
+export async function uploadImageToCloudinary(input: { dataUrl: string; folder: string }, fetchImpl: typeof fetch = fetch) {
+  const { apiKey, apiSecret, cloudName } = getCloudinaryConfig();
+  const timestamp = Math.floor(Date.now() / 1000);
+  const signature = createHash("sha1").update(`folder=${input.folder}&timestamp=${timestamp}${apiSecret}`).digest("hex");
+  const form = new FormData();
+  form.append("file", input.dataUrl);
+  form.append("api_key", apiKey);
+  form.append("timestamp", String(timestamp));
+  form.append("signature", signature);
+  form.append("folder", input.folder);
+  const response = await fetchImpl(`https://api.cloudinary.com/v1_1/${encodeURIComponent(cloudName)}/image/upload`, { method: "POST", body: form });
+  if (!response.ok) throw new Error(`Cloudinary upload failed (HTTP ${response.status})`);
+  const data = (await response.json()) as { secure_url: string; public_id: string };
+  return { url: data.secure_url, publicId: data.public_id };
+}
