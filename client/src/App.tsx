@@ -13,6 +13,7 @@ import Shop from "./pages/Shop";
 import Checkout from "./pages/Checkout";
 import Receipt from "./pages/Receipt";
 import { ProductReviewMount } from "./components/ProductReviews";
+import { WhatsAppButton } from "./components/WhatsAppButton";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -46,7 +47,7 @@ function App() {
         // switchable
       >
         <TooltipProvider>
-          <CartProvider><Toaster /><Router /><ProductReviewMount /></CartProvider>
+          <CartProvider><Toaster /><Router /><ProductReviewMount /><WhatsAppButton /></CartProvider>
         </TooltipProvider>
       </ThemeProvider>
       </MotionConfig>

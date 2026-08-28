@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { assertValidAdminAccessToken, issueAdminAccessToken } from "../adminAuth";
 import { deleteCloudinaryImage, getCloudinaryUploadSignature } from "../cloudinary";
-import { addCategoryImage, addHomeSectionItem, addHomeSectionItemFromSuit, addProductMedia, createHomeSection, createStoreCategory, createStudioSuit, deleteCategoryImage, deleteHomeSection, deleteHomeSectionItem, deleteMotionMedia, deleteProductMedia, deleteProductMediaForProduct, deleteStoreOrder, getCategoryImageById, getDeliverySettings, getStoreOrderByNumber, hideStoreProduct, listAllCategoryImages, listAllReviews, listCategoryImages, listHomeSections, listMotionMedia, listProductMedia, listPublishedStudioSuits, listSaleOverrides, listStoreCategories, listStoreOrders, listStoreOrdersPage, listStudioSuits, listSuitFilterMeta, publishStudioSuit, removeSuitFilterMeta, reorderMotionMedia, reorderProductMedia, saveLocalImageUpload, updateDeliverySettings, updateReviewStatus, updateStoreCategoryHeroImage, updateStoreOrderFulfillmentStatus, upsertSaleOverride, upsertSuitFilterMeta } from "../db";
+import { addCategoryImage, addFilterPreset, addHomeSectionItem, addHomeSectionItemFromSuit, addProductMedia, createHomeSection, createStoreCategory, createStudioSuit, deleteCategoryImage, deleteHomeSection, deleteHomeSectionItem, deleteMotionMedia, deleteProductMedia, deleteProductMediaForProduct, deleteStoreOrder, getCategoryImageById, getDeliverySettings, getStoreOrderByNumber, hideStoreProduct, listAllCategoryImages, listAllReviews, listCategoryImages, listFilterPresets, listHomeSections, listMotionMedia, listProductMedia, listPublishedStudioSuits, listSaleOverrides, listStoreCategories, listStoreOrders, listStoreOrdersPage, listStudioSuits, listSuitFilterMeta, publishStudioSuit, removeFilterPreset, removeSuitFilterMeta, reorderMotionMedia, reorderProductMedia, saveLocalImageUpload, updateDeliverySettings, updateReviewStatus, updateStoreCategoryHeroImage, updateStoreOrderFulfillmentStatus, upsertSaleOverride, upsertSuitFilterMeta } from "../db";
 import { publicProcedure, router } from "../_core/trpc";
 const adminToken = z.string().min(32); const adminOnly = (token: string) => assertValidAdminAccessToken(token);
 export const adminRouter = router({
@@ -38,6 +38,11 @@ export const adminRouter = router({
     list: publicProcedure.input(z.object({ adminToken })).query(({ input }) => { adminOnly(input.adminToken); return listSuitFilterMeta(); }),
     save: publicProcedure.input(z.object({ adminToken, productHandle: z.string().min(1).max(180), color: z.string().min(1).max(60), style: z.string().min(1).max(60), season: z.string().min(1).max(60), category: z.string().max(80).optional(), hideFromAll: z.boolean().optional() })).mutation(({ input }) => { adminOnly(input.adminToken); return upsertSuitFilterMeta(input); }),
     remove: publicProcedure.input(z.object({ adminToken, productHandle: z.string().min(1).max(180) })).mutation(({ input }) => { adminOnly(input.adminToken); return removeSuitFilterMeta(input.productHandle); }),
+  }),
+  filterPresets: router({
+    list: publicProcedure.input(z.object({ adminToken })).query(({ input }) => { adminOnly(input.adminToken); return listFilterPresets(); }),
+    add: publicProcedure.input(z.object({ adminToken, kind: z.enum(["color", "style", "season"]), value: z.string().min(1).max(60) })).mutation(({ input }) => { adminOnly(input.adminToken); return addFilterPreset(input); }),
+    remove: publicProcedure.input(z.object({ adminToken, id: z.number().int().positive() })).mutation(async ({ input }) => { adminOnly(input.adminToken); await removeFilterPreset(input.id); return { id: input.id }; }),
   }),
   media: router({
     list: publicProcedure.input(z.object({ adminToken, productHandle: z.string().min(1).max(180) })).query(({ input }) => { adminOnly(input.adminToken); return listProductMedia(input.productHandle); }),
