@@ -5,6 +5,7 @@ import { CutToMoveMediaManager } from "@/components/CutToMoveMediaManager";
 import { SuitFilterManager } from "@/components/SuitFilterManager";
 import { EditorialDragReorder } from "@/components/EditorialDragReorder";
 import { StudioSuitPublishManager } from "@/components/StudioSuitPublishManager";
+import { SiteBannerManager } from "@/components/SiteBannerManager";
 import { HomeSectionsManager } from "@/components/HomeSectionsManager";
 import { ReviewManager } from "@/components/ReviewManager";
 import { SalesManager } from "@/components/SalesManager";
@@ -37,7 +38,7 @@ export default function Admin() {
     return () => window.removeEventListener("libaas:studio-session-expired", handleExpiredSession);
   }, [adminToken]);
   if (!adminToken) return <Gate password={password} setPassword={setPassword} loading={unlock.isPending} onSubmit={event => { event.preventDefault(); unlock.mutate({ password }); }} />;
-  return <><Studio token={adminToken} lock={() => { localStorage.removeItem(ADMIN_STORAGE_KEY); setAdminToken(null); }} /><div className="contents"><SalesManager adminToken={adminToken} /><DeliveryManager adminToken={adminToken} /><ProductMediaManager adminToken={adminToken} /><StudioSuitPublishManager adminToken={adminToken} /><HomeSectionsManager adminToken={adminToken} /><EditorialDragReorder adminToken={adminToken} /><SuitFilterManager adminToken={adminToken} /><CutToMoveMediaManager adminToken={adminToken} /><ReviewManager adminToken={adminToken} /></div></>;
+  return <><Studio token={adminToken} lock={() => { localStorage.removeItem(ADMIN_STORAGE_KEY); setAdminToken(null); }} /><div className="contents"><SalesManager adminToken={adminToken} /><DeliveryManager adminToken={adminToken} /><ProductMediaManager adminToken={adminToken} /><StudioSuitPublishManager adminToken={adminToken} /><SiteBannerManager adminToken={adminToken} /><HomeSectionsManager adminToken={adminToken} /><EditorialDragReorder adminToken={adminToken} /><SuitFilterManager adminToken={adminToken} /><CutToMoveMediaManager adminToken={adminToken} /><ReviewManager adminToken={adminToken} /></div></>;
 }
 
 function Gate({ password, setPassword, loading, onSubmit }: { password: string; setPassword: (value: string) => void; loading: boolean; onSubmit: (event: FormEvent) => void }) {

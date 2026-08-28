@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { assertValidAdminAccessToken, issueAdminAccessToken } from "../adminAuth";
 import { deleteCloudinaryImage, getCloudinaryUploadSignature } from "../cloudinary";
-import { addCategoryImage, addFilterPreset, addHomeSectionItem, addHomeSectionItemFromSuit, addProductMedia, createHomeSection, createStoreCategory, createStudioSuit, deleteCategoryImage, deleteHomeSection, deleteHomeSectionItem, deleteMotionMedia, deleteProductMedia, deleteProductMediaForProduct, deleteStoreOrder, getCategoryImageById, getDeliverySettings, getStoreOrderByNumber, hideStoreProduct, listAllCategoryImages, listAllReviews, listCategoryImages, listFilterPresets, listHomeSections, listMotionMedia, listProductMedia, listPublishedStudioSuits, listSaleOverrides, listStoreCategories, listStoreOrders, listStoreOrdersPage, listStudioSuits, listSuitFilterMeta, publishStudioSuit, removeFilterPreset, removeSuitFilterMeta, reorderMotionMedia, reorderProductMedia, saveLocalImageUpload, updateDeliverySettings, updateReviewStatus, updateStoreCategoryHeroImage, updateStoreOrderFulfillmentStatus, upsertSaleOverride, upsertSuitFilterMeta } from "../db";
+import { addCategoryImage, addFilterPreset, addHomeSectionItem, addHomeSectionItemFromSuit, addProductMedia, createHomeSection, createStoreCategory, createStudioSuit, deleteCategoryImage, deleteHomeSection, deleteHomeSectionItem, deleteMotionMedia, deleteProductMedia, deleteProductMediaForProduct, deleteStoreOrder, getCategoryImageById, getDeliverySettings, getSiteBanner, getStoreOrderByNumber, hideStoreProduct, listAllCategoryImages, listAllReviews, listCategoryImages, listFilterPresets, listHomeSections, listMotionMedia, listProductMedia, listPublishedStudioSuits, listSaleOverrides, listStoreCategories, listStoreOrders, listStoreOrdersPage, listStudioSuits, listSuitFilterMeta, publishStudioSuit, removeFilterPreset, removeSuitFilterMeta, reorderMotionMedia, reorderProductMedia, saveLocalImageUpload, updateDeliverySettings, updateReviewStatus, updateSiteBanner, updateStoreCategoryHeroImage, updateStoreOrderFulfillmentStatus, upsertSaleOverride, upsertSuitFilterMeta } from "../db";
 import { publicProcedure, router } from "../_core/trpc";
 const adminToken = z.string().min(32); const adminOnly = (token: string) => assertValidAdminAccessToken(token);
 export const adminRouter = router({
@@ -19,6 +19,10 @@ export const adminRouter = router({
   delivery: router({
     get: publicProcedure.input(z.object({ adminToken })).query(({ input }) => { adminOnly(input.adminToken); return getDeliverySettings(); }),
     update: publicProcedure.input(z.object({ adminToken, freeDelivery: z.boolean(), deliveryFee: z.string().regex(/^\d+(?:\.\d{1,2})?$/) })).mutation(({ input }) => { adminOnly(input.adminToken); return updateDeliverySettings(input); }),
+  }),
+  siteBanner: router({
+    get: publicProcedure.input(z.object({ adminToken })).query(({ input }) => { adminOnly(input.adminToken); return getSiteBanner(); }),
+    update: publicProcedure.input(z.object({ adminToken, saleMessage: z.string().max(120), deliveryMessage: z.string().max(120) })).mutation(({ input }) => { adminOnly(input.adminToken); return updateSiteBanner(input); }),
   }),
   reviews: router({
     list: publicProcedure.input(z.object({ adminToken, limit: z.number().int().min(1).max(1000).optional() })).query(({ input }) => { adminOnly(input.adminToken); return listAllReviews(input.limit); }),
