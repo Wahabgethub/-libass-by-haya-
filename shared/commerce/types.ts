@@ -66,6 +66,7 @@ export type Product = {
   options: ProductOption[];
   variants: ProductVariant[];
   colorVariants?: { handle: string; title: string; colorLabel: string; imageUrl: string | null; active: boolean }[];
+  deliveryFee?: number | null;
 };
 
 export type Collection = {
@@ -84,6 +85,7 @@ export type CartItem = {
   productTitle: string;
   variantTitle: string;
   image: Image | null;
+  deliveryFee?: number | null;
   unitPrice: Money;
   /** Administrator-configured regular price when this cart line is on sale. */
   regularPrice?: Money;

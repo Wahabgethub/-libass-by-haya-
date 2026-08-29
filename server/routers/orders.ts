@@ -12,7 +12,7 @@ export const ordersRouter = router({
     const items = cart.items.map(item => { const price = resolveEffectivePrice(item.unitPrice.amount, overrides.get(item.productHandle)); const lineTotal = (Number(price.effectivePrice) * item.quantity).toFixed(2); return { productHandle: item.productHandle, productTitle: item.productTitle, productImageUrl: item.image?.url, variantTitle: item.variantTitle, regularPrice: price.regularPrice, salePrice: price.salePrice, unitPrice: price.effectivePrice, quantity: item.quantity, lineTotal }; });
     const subtotal = items.reduce((sum, item) => sum + Number(item.lineTotal), 0).toFixed(2);
     const delivery = await getDeliverySettings();
-    const deliveryFee = delivery.freeDelivery ? "0.00" : delivery.deliveryFee;
+    const deliveryFee = delivery.freeDelivery ? "0.00" : Math.max(0, ...cart.items.map(item => item.deliveryFee ?? Number(delivery.deliveryFee))).toFixed(2);
     const total = (Number(subtotal) + Number(deliveryFee)).toFixed(2);
     return createStoreOrder({ ...input, currencyCode: cart.total.currencyCode, subtotal, deliveryFee, total, items });
   }),

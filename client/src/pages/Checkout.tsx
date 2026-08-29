@@ -23,7 +23,7 @@ export default function Checkout() {
     },
     onError: error => setFormError(error.message),
   });
-  const deliveryFee = delivery?.freeDelivery ? 0 : Number(delivery?.deliveryFee ?? 0);
+  const deliveryFee = delivery?.freeDelivery ? 0 : Math.max(0, ...(cart?.items.map(item => item.deliveryFee ?? Number(delivery?.deliveryFee ?? 0)) ?? [Number(delivery?.deliveryFee ?? 0)]));
   const total = useMemo(() => Number(cart?.subtotal.amount ?? 0) + deliveryFee, [cart?.subtotal.amount, deliveryFee]);
   const money = (amount: number | string) => formatMoney({ amount: String(amount), currencyCode: cart?.total.currencyCode ?? "PKR" });
 
