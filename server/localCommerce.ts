@@ -20,7 +20,16 @@ const productForVariant = (variantId: string) => allProducts().flatMap(product =
 export function setSupplementalLocalProducts(products: Product[]) { supplementalProducts = copy(products); }
 
 function refresh(cart: Cart): Cart {
-  const items = cart.items.map(item => ({ ...item, lineTotal: PKR((Number(item.unitPrice.amount) * item.quantity).toFixed(2)) }));
+  const items: CartItem[] = [];
+  for (const item of cart.items) {
+    const found = productForVariant(item.variantId);
+    if (!found || !found.variant.availableForSale) continue;
+    const cap = typeof found.variant.quantityAvailable === "number" ? found.variant.quantityAvailable : Infinity;
+    const quantity = Math.min(item.quantity, cap);
+    if (quantity < 1) continue;
+    const next: CartItem = { ...item, productTitle: found.product.title, variantTitle: found.variant.title, image: found.product.images[0] ?? item.image, unitPrice: found.variant.price, quantity, lineTotal: PKR((Number(found.variant.price.amount) * quantity).toFixed(2)) };
+    items.push(next);
+  }
   const subtotal = items.reduce((sum, item) => sum + Number(item.lineTotal.amount), 0).toFixed(2);
   return { ...cart, items, itemCount: items.reduce((sum, item) => sum + item.quantity, 0), subtotal: PKR(subtotal), total: PKR(subtotal) };
 }
