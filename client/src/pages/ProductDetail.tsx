@@ -15,7 +15,7 @@ type SizeGroup =
   | { label: string; kind: "group"; subs: { label: string; variant: ProductVariant }[]; available: boolean };
 
 export default function ProductDetail({ params }: { params: { handle: string } }) {
-  const { data: product, isLoading, error } = trpc.commerce.products.byHandle.useQuery({ handle: params.handle });
+  const { data: product, isLoading, error } = trpc.commerce.products.byHandle.useQuery({ handle: params.handle }, { refetchInterval: 20000 });
   const { addItem, loading } = useCart();
   const [sizeLabel, setSizeLabel] = useState<string | null>(null);
   const [subLabel, setSubLabel] = useState<string | null>(null);

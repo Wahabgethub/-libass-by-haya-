@@ -10,8 +10,8 @@ type FilterState = { color: string; style: string; season: string; category: str
 const clean = (value: string) => value.trim().toLocaleLowerCase();
 
 export default function Shop() {
-  const { data: products = [], isLoading } = trpc.commerce.products.list.useQuery({ first: 1000 });
-  const { data: filterMeta = [] } = trpc.brand.suitFilters.useQuery();
+  const { data: products = [], isLoading } = trpc.commerce.products.list.useQuery({ first: 1000 }, { refetchInterval: 20000 });
+  const { data: filterMeta = [] } = trpc.brand.suitFilters.useQuery(undefined, { refetchInterval: 20000 });
   const [filters, setFilters] = useState<FilterState>({ color: "", style: "", season: "", category: "" });
   const options = useMemo(() => ({ color: Array.from(new Set(filterMeta.map(item => item.color).filter(Boolean))).sort(), style: Array.from(new Set(filterMeta.map(item => item.style).filter(Boolean))).sort(), season: Array.from(new Set(filterMeta.map(item => item.season).filter(Boolean))).sort() }), [filterMeta]);
   const metaByHandle = useMemo(() => new Map(filterMeta.map(item => [item.productHandle, item])), [filterMeta]);

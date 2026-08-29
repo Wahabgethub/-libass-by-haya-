@@ -11,10 +11,10 @@ const HERO_TEXTURE = "/manus-storage/libass-kinetic-fabric-hero_e3ba0419.jpg";
 const LOOKBOOK: { image: string; title: string; note: string }[] = [];
 
 export default function Home() {
-  const { data: products = [], isLoading } = trpc.commerce.products.list.useQuery({ first: 8 });
-  const { data: uploaded = [] } = trpc.brand.lookbook.useQuery();
-  const { data: motionFrames = [] } = trpc.brand.motion.useQuery();
-  const { data: homeSections = [] } = trpc.brand.homeSections.useQuery();
+  const { data: products = [], isLoading } = trpc.commerce.products.list.useQuery({ first: 8 }, { refetchInterval: 20000 });
+  const { data: uploaded = [] } = trpc.brand.lookbook.useQuery(undefined, { refetchInterval: 20000 });
+  const { data: motionFrames = [] } = trpc.brand.motion.useQuery(undefined, { refetchInterval: 20000 });
+  const { data: homeSections = [] } = trpc.brand.homeSections.useQuery(undefined, { refetchInterval: 20000 });
   const featured = products.slice(0, 4);
   const frames = [...LOOKBOOK, ...uploaded.map(image => ({ image: image.imageUrl, title: image.title, note: "Studio upload" }))];
   return <div className="kinetic-shell min-h-screen overflow-x-hidden"><CinematicIntroduction /><StoreHeader /><main>
