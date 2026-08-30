@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useStudioPanelRoot } from "@/components/useStudioPanelRoot";
 import { trpc } from "@/lib/trpc";
-import { Loader2, Plus, SlidersHorizontal, Tag, X } from "lucide-react";
+import { FolderPlus, Loader2, SlidersHorizontal, Tag, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { toast } from "sonner";
@@ -37,8 +37,14 @@ export function SuitFilterManager({ adminToken }: { adminToken: string }) {
 
 function TagField({ adminToken, kind, label, placeholder, value, setValue, presets }: { adminToken: string; kind: Kind; label: string; placeholder: string; value: string; setValue: (value: string) => void; presets: { id: number; kind: Kind; value: string }[] }) {
   const utils = trpc.useUtils();
+  const [creating, setCreating] = useState(false);
+  const [newValue, setNewValue] = useState("");
   const options = presets.filter(p => p.kind === kind);
-  const addPreset = trpc.admin.filterPresets.add.useMutation({ onSuccess: async () => { await utils.admin.filterPresets.list.invalidate(); toast.success(`${label} added to the list.`); }, onError: error => toast.error(error.message) });
+  const addPreset = trpc.admin.filterPresets.add.useMutation({ onSuccess: async (created) => { await utils.admin.filterPresets.list.invalidate(); setValue(created.value); setNewValue(""); setCreating(false); toast.success(`"${created.value}" folder created and selected.`); }, onError: error => toast.error(error.message) });
   const removePreset = trpc.admin.filterPresets.remove.useMutation({ onSuccess: async () => { await utils.admin.filterPresets.list.invalidate(); }, onError: error => toast.error(error.message) });
-  return <div className="mt-4"><Label className="font-mono text-[9px] tracking-[.13em] text-white/55 uppercase">{label}</Label><div className="mt-2 flex gap-2"><Input value={value} onChange={event => setValue(event.target.value)} className="h-11 flex-1 rounded-none border-white/20 bg-transparent text-white" placeholder={placeholder} /><Button type="button" disabled={!value.trim() || addPreset.isPending} onClick={() => addPreset.mutate({ adminToken, kind, value: value.trim() })} className="h-11 rounded-none border border-white/25 bg-transparent px-4 font-mono text-[9px] tracking-[.1em] text-white uppercase hover:border-[#e1c27a] hover:text-[#e1c27a]"><Plus className="h-3.5 w-3.5" />Save to list</Button></div>{options.length > 0 && <div className="mt-2 flex flex-wrap gap-2">{options.map(option => <span key={option.id} className={`inline-flex items-center gap-1.5 border px-2.5 py-1.5 font-mono text-[9px] tracking-[.08em] uppercase ${value === option.value ? "border-[#e1c27a]/60 text-[#e1c27a]" : "border-white/15 text-white/55"}`}><button type="button" onClick={() => setValue(option.value)}>{option.value}</button><button type="button" onClick={() => removePreset.mutate({ adminToken, id: option.id })} aria-label={`Remove ${option.value}`}><X className="h-2.5 w-2.5" /></button></span>)}</div>}</div>;
+  return <div className="mt-4"><Label className="font-mono text-[9px] tracking-[.13em] text-white/55 uppercase">{label}</Label>
+    <div className="mt-2 flex gap-2"><select value={value} onChange={event => setValue(event.target.value)} className="h-11 flex-1 rounded-none border border-white/20 bg-[#181818] px-3 text-sm text-white"><option value="">Choose a {label.toLowerCase()} folder</option>{options.map(option => <option key={option.id} value={option.value}>{option.value}</option>)}</select><Button type="button" onClick={() => setCreating(current => !current)} className="h-11 rounded-none border border-white/25 bg-transparent px-4 font-mono text-[9px] tracking-[.1em] text-white uppercase hover:border-[#e1c27a] hover:text-[#e1c27a]"><FolderPlus className="h-3.5 w-3.5" />New</Button></div>
+    {creating && <div className="mt-2 flex gap-2"><Input value={newValue} onChange={event => setNewValue(event.target.value)} className="h-10 flex-1 rounded-none border-white/20 bg-transparent text-sm text-white" placeholder={placeholder} autoFocus /><Button type="button" disabled={!newValue.trim() || addPreset.isPending} onClick={() => addPreset.mutate({ adminToken, kind, value: newValue.trim() })} className="h-10 rounded-none bg-[#e1c27a] px-4 font-mono text-[9px] tracking-[.1em] text-[#171417] uppercase hover:bg-white">{addPreset.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Create"}</Button></div>}
+    {options.length > 0 && <div className="mt-2 flex flex-wrap gap-2">{options.map(option => <span key={option.id} className="inline-flex items-center gap-1.5 border border-white/15 px-2 py-1 font-mono text-[8px] tracking-[.06em] text-white/45 uppercase"><button type="button" onClick={() => removePreset.mutate({ adminToken, id: option.id })} aria-label={`Delete ${option.value} folder`}><X className="h-2.5 w-2.5 hover:text-red-400" /></button>{option.value}</span>)}</div>}
+  </div>;
 }
