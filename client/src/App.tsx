@@ -3,7 +3,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { CartProvider } from "@/contexts/CartContext";
 import { MotionConfig } from "framer-motion";
 import NotFound from "@/pages/NotFound";
-import { Route, Switch } from "wouter";
+import { Route, Switch, useLocation } from "wouter";
+import { useEffect } from "react";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
@@ -14,6 +15,13 @@ import Checkout from "./pages/Checkout";
 import Receipt from "./pages/Receipt";
 import { ProductReviewMount } from "./components/ProductReviews";
 import { WhatsAppButton } from "./components/WhatsAppButton";
+
+function ScrollToTop() {
+  const [location] = useLocation();
+  useEffect(() => { if ("scrollRestoration" in window.history) window.history.scrollRestoration = "manual"; }, []);
+  useEffect(() => { window.scrollTo(0, 0); }, [location]);
+  return null;
+}
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -47,7 +55,7 @@ function App() {
         // switchable
       >
         <TooltipProvider>
-          <CartProvider><Toaster /><Router /><ProductReviewMount /><WhatsAppButton /></CartProvider>
+          <CartProvider><Toaster /><ScrollToTop /><Router /><ProductReviewMount /><WhatsAppButton /></CartProvider>
         </TooltipProvider>
       </ThemeProvider>
       </MotionConfig>
